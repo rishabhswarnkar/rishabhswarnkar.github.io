@@ -37,13 +37,16 @@ h5,
 h6 {
   font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
 }
+.text-muted {
+  color: #DCDCDC;
+}
 p {
   font-size: 16px;
   line-height: 1.5;
   margin-bottom: 20px;
 }
 .bg-primary {
-  background-color: #F05F40;
+  background-color: #872341;
 }
 .bg-dark {
   background-color: #222222;
