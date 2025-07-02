@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real Estate Investment Calculator - Compare rental strategies for maximum ROI">
+    <title>Real Estate Investment Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --dark-text: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .strategy-card {
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .strategy-card.short-term {
+            border-left-color: var(--accent-color);
+        }
+        
+        .strategy-card.medium-term {
+            border-left-color: var(--warning-color);
+        }
+        
+        .strategy-card.long-term {
+            border-left-color: var(--success-color);
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        
+        .room-analysis {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .comparison-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .positive { color: var(--success-color); font-weight: 600; }
+        .negative { color: var(--accent-color); font-weight: 600; }
+        .neutral { color: var(--warning-color); font-weight: 600; }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+            
+            .metric-value {
+                font-size: 1.5rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner-border {
+            color: var(--secondary-color);
+        }
+        
+        .market-selector {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-chart-line me-2"></i>Real Estate Investment Calculator</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html"><i class="fas fa-home me-1"></i>Back to Main Site</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#comparison"><i class="fas fa-chart-bar me-1"></i>Compare Strategies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#room-analysis"><i class="fas fa-bed me-1"></i>Room Analysis</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Market Selection -->
+        <div class="market-selector">
+            <h5><i class="fas fa-map-marker-alt me-2"></i>Select Market</h5>
+            <select id="marketSelect" class="form-select" style="background: white; color: var(--dark-text);">
+                <option value="manteca">Manteca, CA</option>
+                <option value="tracy">Tracy, CA</option>
+                <option value="sacramento">Sacramento, CA</option>
+                <option value="phoenix">Phoenix, AZ</option>
+                <option value="reno">Reno, NV</option>
+                <option value="vegas">Las Vegas, NV</option>
+            </select>
+        </div>
+
+        <!-- Property Input Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-home me-2"></i>Property Details</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Property Address</label>
+                            <input type="text" id="propertyAddress" class="form-control" placeholder="123 Main St, City, State">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Bedrooms</label>
+                                    <input type="number" id="bedrooms" class="form-control" value="3" min="1" max="10">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Bathrooms</label>
+                                    <input type="number" id="bathrooms" class="form-control" value="2" min="1" max="10" step="0.5">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Square Footage</label>
+                                    <input type="number" id="sqft" class="form-control" value="1500" min="500" max="10000">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Purchase Price ($)</label>
+                                    <input type="number" id="purchasePrice" class="form-control" value="400000" min="50000" max="2000000">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Down Payment (%)</label>
+                                    <input type="number" id="downPayment" class="form-control" value="20" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Interest Rate (%)</label>
+                                    <input type="number" id="interestRate" class="form-control" value="7.5" min="1" max="15" step="0.1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Loan Term (years)</label>
+                                    <input type="number" id="loanTerm" class="form-control" value="30" min="10" max="30">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="calculateStrategies()">
+                    <i class="fas fa-calculator me-2"></i>Calculate Rental Strategies
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Calculating rental strategies...</p>
+        </div>
+
+        <!-- Strategy Comparison -->
+        <div id="comparison" class="row mb-4" style="display: none;">
+            <div class="col-md-4">
+                <div class="card strategy-card short-term h-100">
+                    <div class="card-header">
+                        <h5><i class="fas fa-plane me-2"></i>Short-Term Rental</h5>
+                        <small>Airbnb / VRBO</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Nightly Rate ($)</label>
+                                <input type="number" id="nightlyRate" class="form-control" value="150">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Occupancy (%)</label>
+                                <input type="number" id="occupancyRate" class="form-control" value="70">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Cleaning Fee ($)</label>
+                                <input type="number" id="cleaningFee" class="form-control" value="100">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Platform Fee (%)</label>
+                                <input type="number" id="platformFee" class="form-control" value="3">
+                            </div>
+                        </div>
+                        <div id="shortTermResults" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card strategy-card medium-term h-100">
+                    <div class="card-header">
+                        <h5><i class="fas fa-calendar-alt me-2"></i>Medium-Term Rental</h5>
+                        <small>Month-to-Month</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Monthly Rate ($)</label>
+                                <input type="number" id="monthlyRate" class="form-control" value="2800">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Vacancy Rate (%)</label>
+                                <input type="number" id="vacancyRate" class="form-control" value="10">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Turnover Cost ($)</label>
+                                <input type="number" id="turnoverCost" class="form-control" value="500">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Turnovers/Year</label>
+                                <input type="number" id="turnoversPerYear" class="form-control" value="2">
+                            </div>
+                        </div>
+                        <div id="mediumTermResults" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card strategy-card long-term h-100">
+                    <div class="card-header">
+                        <h5><i class="fas fa-home me-2"></i>Long-Term Rental</h5>
+                        <small>Annual Lease</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Monthly Rent ($)</label>
+                                <input type="number" id="longTermRent" class="form-control" value="2400">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Vacancy Rate (%)</label>
+                                <input type="number" id="longTermVacancy" class="form-control" value="5">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Screening Cost ($)</label>
+                                <input type="number" id="screeningCost" class="form-control" value="200">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Maintenance Reserve (%)</label>
+                                <input type="number" id="maintenanceReserve" class="form-control" value="8">
+                            </div>
+                        </div>
+                        <div id="longTermResults" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Comparison Chart -->
+        <div id="chartSection" class="card mb-4" style="display: none;">
+            <div class="card-header">
+                <h4><i class="fas fa-chart-bar me-2"></i>Financial Comparison</h4>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room-by-Room Analysis -->
+        <div id="room-analysis" class="card mb-4" style="display: none;">
+            <div class="card-header">
+                <h4><i class="fas fa-bed me-2"></i>Room-by-Room Analysis</h4>
+            </div>
+            <div class="card-body">
+                <div class="room-analysis mb-4">
+                    <h5><i class="fas fa-users me-2"></i>House Hacking Scenarios</h5>
+                    <p>Analyze individual room rental vs. whole house strategies</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Individual Room Rates</h6>
+                        <div id="roomInputs"></div>
+                        <div class="mt-3">
+                            <label class="form-label">Shared Utilities ($)</label>
+                            <input type="number" id="sharedUtilities" class="form-control" value="200">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Tenant Mix Analysis</h6>
+                        <select id="tenantMix" class="form-select mb-3">
+                            <option value="students">Students</option>
+                            <option value="professionals">Young Professionals</option>
+                            <option value="mixed">Mixed</option>
+                        </select>
+                        <div id="roomAnalysisResults"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Comparison Table -->
+        <div id="detailedComparison" class="comparison-table mb-4" style="display: none;">
+            <div class="card-header">
+                <h4><i class="fas fa-table me-2"></i>Detailed Financial Analysis</h4>
+                <div class="btn-group mt-2" role="group">
+                    <button class="btn btn-outline-light btn-sm" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf me-1"></i>Export PDF
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" onclick="exportToCSV()">
+                        <i class="fas fa-file-csv me-1"></i>Export CSV
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" onclick="saveScenario()">
+                        <i class="fas fa-save me-1"></i>Save Scenario
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Short-Term</th>
+                                <th>Medium-Term</th>
+                                <th>Long-Term</th>
+                                <th>Room Rental</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Scenarios -->
+        <div id="savedScenarios" class="card mb-4" style="display: none;">
+            <div class="card-header">
+                <h4><i class="fas fa-bookmark me-2"></i>Saved Scenarios</h4>
+            </div>
+            <div class="card-body">
+                <div id="scenariosList"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 Real Estate Investment Calculator. Built for serious investors.</p>
+            <p><a href="../index.html" class="text-light">← Back to Main Website</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Market-specific data
+        const marketData = {
+            manteca: { appreciation: 4.5, taxRate: 1.2, avgRent: 2400, shortTermMultiplier: 1.3 },
+            tracy: { appreciation: 4.2, taxRate: 1.1, avgRent: 2600, shortTermMultiplier: 1.25 },
+            sacramento: { appreciation: 5.0, taxRate: 1.0, avgRent: 2200, shortTermMultiplier: 1.4 },
+            phoenix: { appreciation: 6.5, taxRate: 0.8, avgRent: 1800, shortTermMultiplier: 1.6 },
+            reno: { appreciation: 4.8, taxRate: 0.9, avgRent: 2000, shortTermMultiplier: 1.5 },
+            vegas: { appreciation: 5.5, taxRate: 0.7, avgRent: 1900, shortTermMultiplier: 1.7 }
+        };
+
+        let comparisonChart = null;
+        let calculationResults = {};
+
+        // Auto-adjust rates based on market selection
+        document.getElementById('marketSelect').addEventListener('change', function() {
+            const market = this.value;
+            const data = marketData[market];
+            
+            document.getElementById('longTermRent').value = data.avgRent;
+            document.getElementById('monthlyRate').value = Math.round(data.avgRent * 1.15);
+            document.getElementById('nightlyRate').value = Math.round((data.avgRent * data.shortTermMultiplier) / 30);
+        });
+
+        function calculateMortgage(principal, rate, years) {
+            const monthlyRate = rate / 100 / 12;
+            const numPayments = years * 12;
+            const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                                 (Math.pow(1 + monthlyRate, numPayments) - 1);
+            return monthlyPayment;
+        }
+
+        function calculateStrategies() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            
+            setTimeout(() => {
+                const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
+                const downPaymentPercent = parseFloat(document.getElementById('downPayment').value);
+                const interestRate = parseFloat(document.getElementById('interestRate').value);
+                const loanTerm = parseFloat(document.getElementById('loanTerm').value);
+                const bedrooms = parseInt(document.getElementById('bedrooms').value);
+                
+                const downPaymentAmount = purchasePrice * (downPaymentPercent / 100);
+                const loanAmount = purchasePrice - downPaymentAmount;
+                const monthlyMortgage = calculateMortgage(loanAmount, interestRate, loanTerm);
+                const market = document.getElementById('marketSelect').value;
+                const marketInfo = marketData[market];
+                
+                // Property taxes and insurance
+                const monthlyTaxes = (purchasePrice * (marketInfo.taxRate / 100)) / 12;
+                const monthlyInsurance = purchasePrice * 0.004 / 12;
+                const totalMonthlyExpenses = monthlyMortgage + monthlyTaxes + monthlyInsurance;
+
+                // Calculate each strategy
+                calculationResults = {
+                    shortTerm: calculateShortTerm(totalMonthlyExpenses),
+                    mediumTerm: calculateMediumTerm(totalMonthlyExpenses),
+                    longTerm: calculateLongTerm(totalMonthlyExpenses),
+                    roomRental: calculateRoomRental(totalMonthlyExpenses, bedrooms)
+                };
+
+                displayResults();
+                createComparisonChart();
+                createRoomAnalysis();
+                createDetailedTable();
+                
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('comparison').style.display = 'block';
+                document.getElementById('chartSection').style.display = 'block';
+                document.getElementById('room-analysis').style.display = 'block';
+                document.getElementById('detailedComparison').style.display = 'block';
+                loadSavedScenarios();
+            }, 1500);
+        }
+
+        function calculateShortTerm(monthlyExpenses) {
+            const nightlyRate = parseFloat(document.getElementById('nightlyRate').value);
+            const occupancyRate = parseFloat(document.getElementById('occupancyRate').value) / 100;
+            const cleaningFee = parseFloat(document.getElementById('cleaningFee').value);
+            const platformFee = parseFloat(document.getElementById('platformFee').value) / 100;
+            
+            const daysPerMonth = 30;
+            const occupiedDays = daysPerMonth * occupancyRate;
+            const grossRevenue = (nightlyRate * occupiedDays) + (cleaningFee * occupiedDays / 3);
+            const platformFees = grossRevenue * platformFee;
+            const netRevenue = grossRevenue - platformFees;
+            const netCashFlow = netRevenue - monthlyExpenses - 300; // Additional STR expenses
+            const annualCashFlow = netCashFlow * 12;
+            
+            return {
+                monthlyRevenue: netRevenue,
+                monthlyCashFlow: netCashFlow,
+                annualCashFlow: annualCashFlow,
+                roi: (annualCashFlow / (parseFloat(document.getElementById('purchasePrice').value) * 
+                     (parseFloat(document.getElementById('downPayment').value) / 100))) * 100
+            };
+        }
+
+        function calculateMediumTerm(monthlyExpenses) {
+            const monthlyRate = parseFloat(document.getElementById('monthlyRate').value);
+            const vacancyRate = parseFloat(document.getElementById('vacancyRate').value) / 100;
+            const turnoverCost = parseFloat(document.getElementById('turnoverCost').value);
+            const turnoversPerYear = parseFloat(document.getElementById('turnoversPerYear').value);
+            
+            const effectiveRevenue = monthlyRate * (1 - vacancyRate);
+            const annualTurnoverCosts = turnoverCost * turnoversPerYear;
+            const monthlyTurnoverCosts = annualTurnoverCosts / 12;
+            const netCashFlow = effectiveRevenue - monthlyExpenses - monthlyTurnoverCosts;
+            const annualCashFlow = netCashFlow * 12;
+            
+            return {
+                monthlyRevenue: effectiveRevenue,
+                monthlyCashFlow: netCashFlow,
+                annualCashFlow: annualCashFlow,
+                roi: (annualCashFlow / (parseFloat(document.getElementById('purchasePrice').value) * 
+                     (parseFloat(document.getElementById('downPayment').value) / 100))) * 100
+            };
+        }
+
+        function calculateLongTerm(monthlyExpenses) {
+            const monthlyRent = parseFloat(document.getElementById('longTermRent').value);
+            const vacancyRate = parseFloat(document.getElementById('longTermVacancy').value) / 100;
+            const maintenanceReserve = parseFloat(document.getElementById('maintenanceReserve').value) / 100;
+            const screeningCost = parseFloat(document.getElementById('screeningCost').value);
+            
+            const effectiveRevenue = monthlyRent * (1 - vacancyRate);
+            const maintenanceCosts = monthlyRent * maintenanceReserve;
+            const monthlyScreeningCosts = screeningCost / 12;
+            const netCashFlow = effectiveRevenue - monthlyExpenses - maintenanceCosts - monthlyScreeningCosts;
+            const annualCashFlow = netCashFlow * 12;
+            
+            return {
+                monthlyRevenue: effectiveRevenue,
+                monthlyCashFlow: netCashFlow,
+                annualCashFlow: annualCashFlow,
+                roi: (annualCashFlow / (parseFloat(document.getElementById('purchasePrice').value) * 
+                     (parseFloat(document.getElementById('downPayment').value) / 100))) * 100
+            };
+        }
+
+        function calculateRoomRental(monthlyExpenses, bedrooms) {
+            const roomRates = [];
+            for (let i = 1; i <= bedrooms; i++) {
+                const roomRate = document.getElementById(`room${i}Rate`)?.value || 800;
+                roomRates.push(parseFloat(roomRate));
+            }
+            
+            const sharedUtilities = parseFloat(document.getElementById('sharedUtilities').value);
+            const totalRoomRevenue = roomRates.reduce((sum, rate) => sum + rate, 0);
+            const netRevenue = totalRoomRevenue - sharedUtilities;
+            const netCashFlow = netRevenue - monthlyExpenses;
+            const annualCashFlow = netCashFlow * 12;
+            
+            return {
+                monthlyRevenue: netRevenue,
+                monthlyCashFlow: netCashFlow,
+                annualCashFlow: annualCashFlow,
+                roi: (annualCashFlow / (parseFloat(document.getElementById('purchasePrice').value) * 
+                     (parseFloat(document.getElementById('downPayment').value) / 100))) * 100
+            };
+        }
+
+        function displayResults() {
+            displayStrategyResults('shortTermResults', calculationResults.shortTerm, 'Short-Term');
+            displayStrategyResults('mediumTermResults', calculationResults.mediumTerm, 'Medium-Term');
+            displayStrategyResults('longTermResults', calculationResults.longTerm, 'Long-Term');
+        }
+
+        function displayStrategyResults(elementId, results, strategyName) {
+            const element = document.getElementById(elementId);
+            const cashFlowClass = results.monthlyCashFlow >= 0 ? 'positive' : 'negative';
+            const roiClass = results.roi >= 8 ? 'positive' : results.roi >= 4 ? 'neutral' : 'negative';
+            
+            element.innerHTML = `
+                <div class="metric-card mb-2">
+                    <div class="metric-value ${cashFlowClass}">$${results.monthlyCashFlow.toLocaleString()}</div>
+                    <div class="metric-label">Monthly Cash Flow</div>
+                </div>
+                <div class="metric-card mb-2">
+                    <div class="metric-value ${roiClass}">${results.roi.toFixed(1)}%</div>
+                    <div class="metric-label">Cash-on-Cash ROI</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">$${results.annualCashFlow.toLocaleString()}</div>
+                    <div class="metric-label">Annual Cash Flow</div>
+                </div>
+            `;
+        }
+
+        function createComparisonChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            if (comparisonChart) {
+                comparisonChart.destroy();
+            }
+            
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Short-Term', 'Medium-Term', 'Long-Term', 'Room Rental'],
+                    datasets: [{
+                        label: 'Monthly Cash Flow ($)',
+                        data: [
+                            calculationResults.shortTerm.monthlyCashFlow,
+                            calculationResults.mediumTerm.monthlyCashFlow,
+                            calculationResults.longTerm.monthlyCashFlow,
+                            calculationResults.roomRental.monthlyCashFlow
+                        ],
+                        backgroundColor: [
+                            'rgba(231, 76, 60, 0.8)',
+                            'rgba(243, 156, 18, 0.8)',
+                            'rgba(39, 174, 96, 0.8)',
+                            'rgba(155, 89, 182, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(231, 76, 60, 1)',
+                            'rgba(243, 156, 18, 1)',
+                            'rgba(39, 174, 96, 1)',
+                            'rgba(155, 89, 182, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Monthly Cash Flow Comparison'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createRoomAnalysis() {
+            const bedrooms = parseInt(document.getElementById('bedrooms').value);
+            const roomInputsContainer = document.getElementById('roomInputs');
+            
+            let roomInputsHTML = '';
+            for (let i = 1; i <= bedrooms; i++) {
+                roomInputsHTML += `
+                    <div class="mb-2">
+                        <label class="form-label">Room ${i} Rate ($)</label>
+                        <input type="number" id="room${i}Rate" class="form-control" value="${800 + (i * 50)}" onchange="calculateStrategies()">
+                    </div>
+                `;
+            }
+            roomInputsContainer.innerHTML = roomInputsHTML;
+            
+            // Update room analysis results
+            const resultsContainer = document.getElementById('roomAnalysisResults');
+            const roomResults = calculationResults.roomRental;
+            const wholeHouseRevenue = Math.max(
+                calculationResults.shortTerm.monthlyRevenue,
+                calculationResults.mediumTerm.monthlyRevenue,
+                calculationResults.longTerm.monthlyRevenue
+            );
+            
+            const advantage = roomResults.monthlyRevenue > wholeHouseRevenue ? 
+                `Room rental generates $${(roomResults.monthlyRevenue - wholeHouseRevenue).toLocaleString()} more monthly` :
+                `Whole house rental generates $${(wholeHouseRevenue - roomResults.monthlyRevenue).toLocaleString()} more monthly`;
+            
+            resultsContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Analysis:</strong> ${advantage}
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value ${roomResults.monthlyCashFlow >= 0 ? 'positive' : 'negative'}">
+                        $${roomResults.monthlyCashFlow.toLocaleString()}
+                    </div>
+                    <div class="metric-label">Monthly Cash Flow</div>
+                </div>
+            `;
+        }
+
+        function createDetailedTable() {
+            const tableBody = document.getElementById('comparisonTableBody');
+            const strategies = ['shortTerm', 'mediumTerm', 'longTerm', 'roomRental'];
+            const strategyNames = ['Short-Term', 'Medium-Term', 'Long-Term', 'Room Rental'];
+            
+            const metrics = [
+                { label: 'Monthly Revenue', key: 'monthlyRevenue', format: 'currency' },
+                { label: 'Monthly Cash Flow', key: 'monthlyCashFlow', format: 'currency' },
+                { label: 'Annual Cash Flow', key: 'annualCashFlow', format: 'currency' },
+                { label: 'Cash-on-Cash ROI', key: 'roi', format: 'percentage' }
+            ];
+            
+            let tableHTML = '';
+            metrics.forEach(metric => {
+                tableHTML += '<tr>';
+                tableHTML += `<td><strong>${metric.label}</strong></td>`;
+                
+                strategies.forEach(strategy => {
+                    const value = calculationResults[strategy][metric.key];
+                    let formattedValue = '';
+                    let className = '';
+                    
+                    if (metric.format === 'currency') {
+                        formattedValue = '$' + value.toLocaleString();
+                        className = value >= 0 ? 'positive' : 'negative';
+                    } else if (metric.format === 'percentage') {
+                        formattedValue = value.toFixed(1) + '%';
+                        className = value >= 8 ? 'positive' : value >= 4 ? 'neutral' : 'negative';
+                    }
+                    
+                    tableHTML += `<td class="${className}">${formattedValue}</td>`;
+                });
+                
+                tableHTML += '</tr>';
+            });
+            
+            tableBody.innerHTML = tableHTML;
+        }
+
+        function exportToPDF() {
+            // Simplified PDF export - in reality, you'd use a library like jsPDF
+            alert('PDF export functionality would be implemented with jsPDF library. For now, use the browser\'s print function (Ctrl+P) and save as PDF.');
+            window.print();
+        }
+
+        function exportToCSV() {
+            const data = [
+                ['Metric', 'Short-Term', 'Medium-Term', 'Long-Term', 'Room Rental'],
+                ['Monthly Revenue', 
+                    calculationResults.shortTerm.monthlyRevenue,
+                    calculationResults.mediumTerm.monthlyRevenue,
+                    calculationResults.longTerm.monthlyRevenue,
+                    calculationResults.roomRental.monthlyRevenue
+                ],
+                ['Monthly Cash Flow',
+                    calculationResults.shortTerm.monthlyCashFlow,
+                    calculationResults.mediumTerm.monthlyCashFlow,
+                    calculationResults.longTerm.monthlyCashFlow,
+                    calculationResults.roomRental.monthlyCashFlow
+                ],
+                ['Annual Cash Flow',
+                    calculationResults.shortTerm.annualCashFlow,
+                    calculationResults.mediumTerm.annualCashFlow,
+                    calculationResults.longTerm.annualCashFlow,
+                    calculationResults.roomRental.annualCashFlow
+                ],
+                ['Cash-on-Cash ROI',
+                    calculationResults.shortTerm.roi,
+                    calculationResults.mediumTerm.roi,
+                    calculationResults.longTerm.roi,
+                    calculationResults.roomRental.roi
+                ]
+            ];
+            
+            const csvContent = data.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'rental-strategy-comparison.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function saveScenario() {
+            const scenarioName = prompt('Enter a name for this scenario:');
+            if (!scenarioName) return;
+            
+            const scenario = {
+                name: scenarioName,
+                date: new Date().toISOString(),
+                propertyDetails: {
+                    address: document.getElementById('propertyAddress').value,
+                    bedrooms: document.getElementById('bedrooms').value,
+                    bathrooms: document.getElementById('bathrooms').value,
+                    sqft: document.getElementById('sqft').value,
+                    purchasePrice: document.getElementById('purchasePrice').value,
+                    downPayment: document.getElementById('downPayment').value
+                },
+                results: calculationResults
+            };
+            
+            const savedScenarios = JSON.parse(localStorage.getItem('rentalScenarios') || '[]');
+            savedScenarios.push(scenario);
+            localStorage.setItem('rentalScenarios', JSON.stringify(savedScenarios));
+            
+            alert('Scenario saved successfully!');
+            loadSavedScenarios();
+        }
+
+        function loadSavedScenarios() {
+            const savedScenarios = JSON.parse(localStorage.getItem('rentalScenarios') || '[]');
+            if (savedScenarios.length === 0) return;
+            
+            document.getElementById('savedScenarios').style.display = 'block';
+            const scenariosList = document.getElementById('scenariosList');
+            
+            let scenariosHTML = '';
+            savedScenarios.forEach((scenario, index) => {
+                scenariosHTML += `
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h6>${scenario.name}</h6>
+                            <small class="text-muted">${new Date(scenario.date).toLocaleDateString()}</small>
+                            <p class="mb-1">${scenario.propertyDetails.address}</p>
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadScenario(${index})">Load</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteScenario(${index})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            scenariosList.innerHTML = scenariosHTML;
+        }
+
+        function loadScenario(index) {
+            const savedScenarios = JSON.parse(localStorage.getItem('rentalScenarios') || '[]');
+            const scenario = savedScenarios[index];
+            
+            // Load property details
+            Object.keys(scenario.propertyDetails).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) element.value = scenario.propertyDetails[key];
+            });
+            
+            // Load results
+            calculationResults = scenario.results;
+            
+            // Display everything
+            displayResults();
+            createComparisonChart();
+            createDetailedTable();
+            
+            document.getElementById('comparison').style.display = 'block';
+            document.getElementById('chartSection').style.display = 'block';
+            document.getElementById('detailedComparison').style.display = 'block';
+        }
+
+        function deleteScenario(index) {
+            if (!confirm('Are you sure you want to delete this scenario?')) return;
+            
+            const savedScenarios = JSON.parse(localStorage.getItem('rentalScenarios') || '[]');
+            savedScenarios.splice(index, 1);
+            localStorage.setItem('rentalScenarios', JSON.stringify(savedScenarios));
+            
+            loadSavedScenarios();
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default market
+            document.getElementById('marketSelect').dispatchEvent(new Event('change'));
+            loadSavedScenarios();
+        });
+
+        // Auto-calculate when inputs change
+        document.addEventListener('input', function(e) {
+            if (e.target.type === 'number' && Object.keys(calculationResults).length > 0) {
+                setTimeout(calculateStrategies, 500); // Debounce calculations
+            }
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
