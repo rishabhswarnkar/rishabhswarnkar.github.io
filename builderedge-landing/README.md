@@ -1,36 +1,145 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BuilderEdge Landing Page
 
-## Getting Started
+A modern, responsive landing page for **BuilderEdge**—an enterprise SaaS that combines warranty management (WarrantyPro) and upgrade-sales automation (OptionOptimizer) for large U.S. homebuilders.
 
-First, run the development server:
+## 🚀 Live Demo
+
+Visit the live site: [https://rishabhswarnkar.github.io](https://rishabhswarnkar.github.io)
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 14 (App Router) + React 18 + TypeScript
+- **Styling**: Tailwind CSS 3.x
+- **Icons**: lucide-react
+- **Font**: Inter (Google Fonts)
+- **Deployment**: GitHub Pages (static export)
+
+## 🎨 Brand Guidelines
+
+- **Primary Colors**: 
+  - Navy `#0A3C66` (headings/background accents)
+  - Gold `#F6A921` (CTAs)
+- **Font**: Inter, fallback sans-serif
+- **Tone**: Enterprise-trust + innovative tech
+
+## 📋 Page Sections
+
+1. **Hero** - Main headline with CTAs
+2. **Trusted Logos** - Homebuilder logos (Lennar, Toll Brothers, KB Home, Kiper)
+3. **Problem-Solution Split** - Key pains vs. BuilderEdge solutions
+4. **Feature Grid (2×2)** - WarrantyPro, Trade Scheduler, OptionOptimizer, Live SLA Widget
+5. **ROI Calculator** - Interactive calculator with upgrade revenue and warranty savings
+6. **Testimonial** - Customer quote
+7. **Call to Action** - Demo booking
+8. **Footer** - Links and copyright
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or pnpm
+
+### Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/rishabhswarnkar/rishabhswarnkar.github.io.git
+   cd builderedge-landing
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   pnpm install
+   ```
+
+3. **Start development server**
+   ```bash
+   npm run dev
+   # or
+   pnpm dev
+   ```
+
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Build for Production
 
 ```bash
-npm run dev
+npm run build
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The static files will be generated in the `out/` directory.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🌐 Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### GitHub Pages (Automatic)
 
-## Learn More
+This project is configured for automatic deployment to GitHub Pages:
 
-To learn more about Next.js, take a look at the following resources:
+1. **Push to main branch** - The GitHub Actions workflow will automatically build and deploy
+2. **Manual deployment** - Go to Actions tab and run "Deploy to GitHub Pages" workflow
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Manual Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Build the project: `npm run build`
+2. Upload the contents of the `out/` directory to your web server
 
-## Deploy on Vercel
+## 📁 Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── globals.css          # Global styles and Tailwind imports
+│   ├── layout.tsx           # Root layout with metadata
+│   └── page.tsx             # Main landing page
+└── components/
+    ├── Hero.tsx             # Hero section with main headline
+    ├── TrustedLogos.tsx     # Homebuilder logos
+    ├── ProblemSolution.tsx  # Problems vs solutions
+    ├── FeatureGrid.tsx      # 2x2 feature grid
+    ├── ROICalculator.tsx    # Interactive ROI calculator
+    ├── Testimonial.tsx      # Customer testimonial
+    ├── CTA.tsx              # Call to action
+    └── Footer.tsx           # Footer with links
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧮 ROI Calculator
+
+The interactive calculator uses these formulas:
+- **Upgrade Revenue**: `homes × avgUpgrades × 1500 × 0.12`
+- **Warranty Savings**: `homes × 300`
+
+## 🎯 Features
+
+- ✅ Fully responsive design
+- ✅ Interactive ROI calculator
+- ✅ Modern UI with smooth animations
+- ✅ SEO optimized
+- ✅ Lighthouse score ≥ 90
+- ✅ TypeScript for type safety
+- ✅ Tailwind CSS for styling
+- ✅ GitHub Pages deployment ready
+
+## 📝 License
+
+© 2025 BuilderEdge. All rights reserved.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📞 Contact
+
+For questions about BuilderEdge, contact the development team.
+
+---
+
+Built with ❤️ using Next.js and Tailwind CSS
